@@ -1,51 +1,56 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Product } from '../models/product.model';
+import {
+  AngularFirestore,
+  AngularFirestoreCollection,
+} from '@angular/fire/compat/firestore';
 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductService {
-  private products: Product[] = [];
+  private products: Observable<Product[]>;
 
-  constructor() {
-    this.products.push({
-      name: "Aguacate",
-      price: 100,
-      description: "Lorem ipsum dolor sit amet.",
-      type: "Frutas y Verduras",
-      photo: "https://picsum.photos/500/300?random",
+  private productCollection: AngularFirestoreCollection<Product>;
+
+  constructor(private firestore:AngularFirestore) {
+    this.productCollection = this.firestore.collection<Product>('products');
+    this.products = this.productCollection.valueChanges({idField:'id'});
+  }
+
+  saveProduct(product: Product): Promise<string> {
+    return this.productCollection.add(product)
+    .then((doc)=>{
+      return "Success";
+    })
+    .catch((error)=>{
+      return "error";
     });
-    this.products.push({
-      name: "Coca Cola",
-      price: 20,
-      description: "Lorem ipsum dolor sit amet.",
-      type: "Abarrotes",
-      photo: "https://picsum.photos/500/300?random"
+  }
+  deleteProduct(index?:string):Promise<String>{
+    return this.productCollection.doc(index).delete()
+    .then(()=>{
+      return 'Success';
+    })
+    .catch((error)=>{
+      return 'error';
     });
-    this.products.push({
-      name: "Jabón Zote",
-      price: 40,
-      description: "Lorem ipsum dolor sit amet.",
-      type: "Limpieza",
-      photo: "https://picsum.photos/500/300?random"
-    });
-    this.products.push({
-      name: "Aspirina",
-      price: 50,
-      description: "Lorem ipsum dolor sit amet.",
-      type: "Farmacia",
-      photo: "https://picsum.photos/500/300?random"
+  }
+  updateProduct(updateProduct: Partial<Product>,index?:string):Promise<String>{
+    return this.productCollection.doc(index).update(updateProduct)
+    .then(()=>{
+      return 'Success';
+    })
+    .catch((error)=>{
+      console.error('Error al actualizar el producto',error);
+      return 'Error';
     });
   }
 
-  saveProduct(product: Product): Observable<any> {
-    this.products.push(product);
-    return of(product);
-  }
-
-  getProducts(): Observable<any[]> {
-    return of(this.products);
+  getProducts(): Observable<Product[]> {
+    //return of(this.products);
+    return this.products;
   }
 }
