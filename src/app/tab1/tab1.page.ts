@@ -14,6 +14,7 @@ import { AlertController, ToastController } from '@ionic/angular';
 export class Tab1Page {
   public products: Product[] = [];
   public productsFounds: Product[] = [];
+
   public filter = ['Abarrotes', 'Frutas y Verduras', 'Limpieza', 'Farmacia'];
 
   public colors = [
@@ -106,15 +107,19 @@ export class Tab1Page {
 
   updateProduct(index?: any) {
     localStorage.setItem('indexValue', index);
-    this.router.navigate([`/add-product`]);
+    this.router.navigate([`/update-product`]);
   } //Funcion para actualizar producto
 
-  public addToCart(product: Product, i: number) {
+  addToCart(product: Product, i: number) {
     product.photo = product.photo + i;
     this.cartService.addToCart(product);
     console.log(this.cartService.getCart());
   }
-
+  addFavorites(newFavorite:Product){
+    this.productService.saveFavorites(newFavorite);
+    console.log("Aqui?");
+    
+  }
   openProductAddPage() {
     this.router.navigate(['/add-product']); // Asume que la ruta 'product-add' existe para añadir productos.
   }

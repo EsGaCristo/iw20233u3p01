@@ -44,6 +44,9 @@
       <ion-col size="6" *ngFor="let product of productsFounds; index as i">
         <ion-card>
           <img [src]="product.photo+i" />
+          <ion-button (click)="addFavorites(product)" color="success" fill="outline"  class="badge-button">
+            <ion-icon name="star-outline"></ion-icon>
+          </ion-button>
           <ion-card-header>
             <ion-card-title>
               {{product.name}}

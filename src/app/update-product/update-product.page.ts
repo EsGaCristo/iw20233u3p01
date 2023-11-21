@@ -1,16 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../services/product.service';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { Product } from '../models/product.model';
 
 @Component({
-  selector: 'app-add-product',
-  templateUrl: './add-product.page.html',
-  styleUrls: ['./add-product.page.scss'],
+  selector: 'update-add-product',
+  templateUrl: './update-product.page.html',
+  styleUrls: ['./update-product.page.scss'],
 })
-export class AddProductPage {
+export class UpdateProductPage implements OnInit {
   public productForm: FormGroup;
+  private currentProduct: Product | undefined;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -26,17 +28,35 @@ export class AddProductPage {
       type: ['', Validators.required],
     });
   }
+  ngOnInit() {
+    this.loadProductData();
+  }
 
-
-  async saveProduct() { 
+  async loadProductData() {
+    const indexValue = localStorage.getItem('indexValue');
+    if (indexValue) {
+      this.productService.getProductById(indexValue).subscribe((product) => {
+        if (product) {
+          this.productForm.patchValue({
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            photo: product.photo,
+            type: product.type,
+          });
+        }
+      });
+    }
+  }
+  async updateProduct() {
     if (this.productForm.valid) {
       const product = this.productForm.value;
       this.productService
-        .saveProduct(product)
+        .updateProduct(product, localStorage.getItem('indexValue')?.toString())
         .then(async (result) => {
           if (result === 'Success') {
             const toast = await this.toastController.create({
-              message: 'Producto guardado correctamente',
+              message: 'Producto actualizado correctamente',
               duration: 2000, // Duración de 2 segundos
               position: 'top', // Posición superior
             });
@@ -55,6 +75,5 @@ export class AddProductPage {
     }
     // Redirigir a la pestaña tab1
     this.router.navigate(['/tabs/tab1']);
-    
   }
 }
